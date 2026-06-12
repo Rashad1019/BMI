@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Economy Playbook — Investment Chart</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg-raised: #111729;
+    --bg-card: #151d33;
+    --border: #243150;
+    --text: #e8edf8;
+    --text-dim: #8b97b5;
+    --accent: #ffb454;
+    --accent-soft: rgba(255, 180, 84, 0.12);
+    --safe: #4ade80;
+    --safe-soft: rgba(74, 222, 128, 0.12);
+    --moderate: #facc15;
+    --moderate-soft: rgba(250, 204, 21, 0.12);
+    --aggressive: #fb7185;
+    --aggressive-soft: rgba(251, 113, 133, 0.12);
+    --core: #60a5fa;
+    --core-soft: rgba(96, 165, 250, 0.12);
+    --mono: "Cascadia Code", "SF Mono", Consolas, monospace;
+    --radius: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(96, 165, 250, 0.08), transparent),
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.25) 50%, transparent 50%),
+      radial-gradient(1px 1px at 70% 15%, rgba(255,255,255,0.2) 50%, transparent 50%),
+      radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,0.15) 50%, transparent 50%),
+      radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.18) 50%, transparent 50%),
+      radial-gradient(1px 1px at 10% 65%, rgba(255,255,255,0.12) 50%, transparent 50%);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+
+  /* ---------- Header ---------- */
+  header { margin-bottom: 2.5rem; }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--text-dim); margin-top: 0.75rem; max-width: 640px; }
+  .snapshot-note {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.3rem 0.85rem;
+  }
+  .snapshot-note b { color: var(--moderate); font-weight: 600; }
+
+  /* ---------- Strategy summary ---------- */
+  .strategy {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+  .strategy-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+  }
+  .strategy-card .label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .strategy-card.s-core .label { color: var(--core); }
+  .strategy-card.s-new .label { color: var(--accent); }
+  .strategy-card.s-watch .label { color: var(--text-dim); }
+  .strategy-card p { font-size: 0.85rem; color: var(--text-dim); }
+  .strategy-card .tickers { font-weight: 700; color: var(--text); font-size: 1.05rem; margin-bottom: 0.25rem; }
+
+  /* ---------- Filters ---------- */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--text); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #1a1205; font-weight: 700; }
+  .controls .divider { width: 1px; height: 22px; background: var(--border); margin: 0 0.35rem; }
+  .controls select {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    cursor: pointer;
+    margin-left: auto;
+  }
+
+  /* ---------- Table ---------- */
+  .table-wrap {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  thead th.num { text-align: right; }
+  tbody tr.row {
+    cursor: pointer;
+    transition: background 120ms ease;
+    border-bottom: 1px solid rgba(36, 49, 80, 0.5);
+  }
+  tbody tr.row:hover { background: rgba(96, 165, 250, 0.05); }
+  tbody tr.row:last-child { border-bottom: none; }
+  td { padding: 0.85rem 1rem; vertical-align: middle; }
+  td.num { text-align: right; font-family: var(--mono); font-size: 0.9rem; }
+
+  .ticker-cell { display: flex; align-items: center; gap: 0.7rem; }
+  .ticker-sym {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 0.95rem;
+    min-width: 52px;
+  }
+  .ticker-name { font-size: 0.8rem; color: var(--text-dim); }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.22rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .badge.risk-safer { background: var(--safe-soft); color: var(--safe); }
+  .badge.risk-moderate { background: var(--moderate-soft); color: var(--moderate); }
+  .badge.risk-aggressive { background: var(--aggressive-soft); color: var(--aggressive); }
+  .badge.grp-core { background: var(--core-soft); color: var(--core); }
+  .badge.grp-new { background: var(--accent-soft); color: var(--accent); }
+  .badge.grp-watch { background: rgba(139, 151, 181, 0.12); color: var(--text-dim); }
+  .badge.type { background: rgba(139, 151, 181, 0.1); color: var(--text-dim); }
+
+  .sentiment { font-size: 0.82rem; }
+  .price-na { color: var(--text-dim); font-size: 0.78rem; font-style: italic; }
+
+  /* expanded detail row */
+  tr.detail td {
+    background: var(--bg-card);
+    padding: 1.1rem 1.25rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .detail-grid h4 {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .detail-grid p { font-size: 0.85rem; color: var(--text-dim); }
+  @media (max-width: 640px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .ticker-name { display: none; }
+    td, thead th { padding: 0.7rem 0.6rem; }
+  }
+
+  .expand-hint {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 0.6rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ---------- Calculator ---------- */
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.4rem;
+  }
+  .section-sub { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.25rem; max-width: 620px; }
+
+  .calc {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  .calc-inputs { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; align-items: flex-end; }
+  .calc-field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+  }
+  .calc-field input[type="number"] {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 1.05rem;
+    padding: 0.55rem 0.8rem;
+    width: 140px;
+  }
+  .calc-field input[type="range"] { width: 220px; accent-color: var(--accent); }
+  .calc-field .range-val { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); margin-left: 0.5rem; }
+
+  .alloc-bar {
+    display: flex;
+    height: 36px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+  }
+  .alloc-bar div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #0a0e1a;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: width 300ms ease;
+  }
+  .alloc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.6rem; }
+  .alloc-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+  }
+  .alloc-item .sym { font-family: var(--mono); font-weight: 700; font-size: 0.85rem; }
+  .alloc-item .amt { font-family: var(--mono); font-size: 1.15rem; font-weight: 700; margin-top: 0.15rem; }
+  .alloc-item .pct { font-size: 0.72rem; color: var(--text-dim); }
+  .alloc-item .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.4rem; }
+
+  /* ---------- Footer ---------- */
+  .disclaimer {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+  .disclaimer b { color: var(--moderate); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">SpaceX IPO &middot; Space Economy Playbook</div>
+    <h1>The Brian Mickie Index <span>&mdash;</span> The Investment <span>Chart</span></h1>
+    <p class="subtitle">
+      The core portfolio we already run, the three space-economy picks we're adding ahead of the
+      SpaceX IPO, and the wider watchlist of possible plays — with prices, sentiment, and risk in one place.
+    </p>
+    <div class="snapshot-note">Prices are a <b>snapshot from June 2026 research</b> — verify live quotes before buying</div>
+  </header>
+
+  <section class="strategy">
+    <div class="strategy-card s-core">
+      <div class="label">Existing Core — 40 / 40 / 20</div>
+      <div class="tickers">SCHD &middot; SPLG &middot; BAI</div>
+      <p>Steady dividends, broad market growth, and an AI innovation kicker. The base everything else sits on.</p>
+    </div>
+    <div class="strategy-card s-new">
+      <div class="label">New Space Picks</div>
+      <div class="tickers">NASA &middot; MARS &middot; RDW</div>
+      <p>Two diversified space ETFs plus one high-upside sleeper stock — the "buy the ecosystem, not the headline" trade.</p>
+    </div>
+    <div class="strategy-card s-watch">
+      <div class="label">Watchlist — Other Plays</div>
+      <div class="tickers">RKLB &middot; LUNR &middot; PL &middot; FLY &middot; ASTS &middot; UFO + more</div>
+      <p>Sympathy names and broader baskets that could catch flow from the SpaceX hype cycle.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>All Plays</h2>
+    <p class="section-sub">Filter by group or risk, sort by any measure, and click a row for the full thesis on each name.</p>
+
+    <div class="controls" id="groupFilters">
+      <button class="chip active" data-group="all">All</button>
+      <button class="chip" data-group="core">Core Portfolio</button>
+      <button class="chip" data-group="new">New Picks</button>
+      <button class="chip" data-group="watch">Watchlist</button>
+      <span class="divider"></span>
+      <button class="chip" data-risk="safer">Safer</button>
+      <button class="chip" data-risk="moderate">Moderate</button>
+      <button class="chip" data-risk="aggressive">Aggressive</button>
+      <select id="sortSelect">
+        <option value="default">Sort: Default</option>
+        <option value="price-asc">Price: Low → High</option>
+        <option value="price-desc">Price: High → Low</option>
+        <option value="risk">Risk: Safer → Aggressive</option>
+        <option value="ticker">Ticker: A → Z</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticker / Name</th>
+            <th>Type</th>
+            <th>Group</th>
+            <th class="num">Price</th>
+            <th>Sentiment</th>
+            <th>Risk</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="expand-hint">click any row to expand the full thesis</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Allocation Calculator</h2>
+    <p class="section-sub">
+      Mirrors the original 40/40/20 strategy, with an optional space sleeve carved out and split
+      across NASA, MARS, and RDW (40/40/20 inside the sleeve, matching the same safer-to-aggressive shape).
+    </p>
+    <div class="calc">
+      <div class="calc-inputs">
+        <div class="calc-field">
+          <label for="amountInput">Investment Amount ($)</label>
+          <input type="number" id="amountInput" value="150" min="0" step="10">
+        </div>
+        <div class="calc-field">
+          <label for="spaceSlider">Space Sleeve</label>
+          <input type="range" id="spaceSlider" min="0" max="40" value="20" step="5">
+          <span class="range-val" id="spaceVal">20%</span>
+        </div>
+      </div>
+      <div class="alloc-bar" id="allocBar"></div>
+      <div class="alloc-list" id="allocList"></div>
+    </div>
+  </section>
+
+  <div class="disclaimer">
+    <b>Not financial advice.</b> This chart summarizes personal research from June 2026 for discussion purposes.
+    Prices move fast — several of these names are volatile small caps, and the SpaceX IPO thesis itself
+    argues that hype prices are often the wrong prices. Always verify current quotes and do your own
+    due diligence before investing.
+  </div>
+
+</div>
+
+<script>
+  const PLAYS = [
+    // ---- Core portfolio ----
+    {
+      ticker: "SCHD", name: "Schwab US Dividend Equity ETF", type: "ETF", group: "core",
+      price: null, sentiment: "Stable income anchor", risk: "safer",
+      what: "Holds big, proven companies that pay regular dividends — the 'reliable paycheck' of the portfolio.",
+      why: "40% of the core strategy. Keeps a strong base of stability and regular payouts regardless of what the space trade does."
+    },
+    {
+      ticker: "SPLG", name: "SPDR Portfolio S&P 500 ETF", type: "ETF", group: "core",
+      price: null, sentiment: "Steady broad-market growth", risk: "safer",
+      what: "A low-cost slice of America's biggest companies all at once — grows with the overall economy.",
+      why: "40% of the core strategy. Solid growth with far less risk than concentrating in tech or a single theme."
+    },
+    {
+      ticker: "BAI", name: "AI Innovation ETF", type: "ETF", group: "core",
+      price: null, sentiment: "Higher-risk tech upside", risk: "moderate",
+      what: "Focused on AI and innovative tech companies — the adventurous seed in the original three-seed plan.",
+      why: "20% of the core strategy. A smaller portion for higher-risk, higher-reward exposure to AI's growth."
+    },
+    // ---- New space picks ----
+    {
+      ticker: "NASA", name: "Tema Space Innovators ETF", type: "ETF", group: "new",
+      price: 31.02, sentiment: "Bullish, momentum-driven", risk: "safer",
+      what: "Actively managed ETF focused on the emerging space economy — public space names plus some pre-IPO SpaceX exposure via an SPV. Cited as the biggest space ETF (~$2.4B AUM), up ~51% YTD.",
+      why: "The safest way to ride the SpaceX theme: diversified basket, real pre-IPO access, and the strongest inflow momentum. The 'balanced space basket' of the three picks."
+    },
+    {
+      ticker: "MARS", name: "Roundhill Space & Technology ETF", type: "ETF", group: "new",
+      price: 34.50, sentiment: "Bullish, more concentrated", risk: "moderate",
+      what: "ETF built around companies growing the space economy — holds RKLB, ASTS, PL, LUNR, RDW and similar infrastructure names. Up ~53% YTD.",
+      why: "The growth-oriented middle ground: still diversified, but more tightly tied to the pure space-economy theme than NASA. The two ETFs are proportioned differently, so holding both spreads the bet."
+    },
+    {
+      ticker: "RDW", name: "Redwire Corp", type: "Stock", group: "new",
+      price: 14.87, sentiment: "Strong speculative bullish — the 'sleeper'", risk: "aggressive",
+      what: "Space infrastructure company focused on what comes after launch: orbital systems, satellites, space hardware, and long-duration space operations.",
+      why: "The highest-upside piece. The research video explicitly framed RDW as the sleeper positioned for the post-SpaceX infrastructure phase — but it carries dilution/financing risk and heavy volatility, so it gets the smallest slice."
+    },
+    // ---- Watchlist ----
+    {
+      ticker: "RKLB", name: "Rocket Lab", type: "Stock", group: "watch",
+      price: 105.05, sentiment: "Bullish sector leader", risk: "aggressive",
+      what: "Launch vehicles plus space systems — widely viewed as the clearest public-market alternative to SpaceX.",
+      why: "The strongest single-stock sympathy play, but it's no longer a low-priced entry and is already richly momentum-driven."
+    },
+    {
+      ticker: "LUNR", name: "Intuitive Machines", type: "Stock", group: "watch",
+      price: 26.54, sentiment: "Bullish, volatile", risk: "moderate",
+      what: "Lunar landers and space services contractor — a recognizable name that moves hard on sector sentiment.",
+      why: "One of the cleaner under-$50 sympathy trades, with analyst optimism, but still a small-cap moonshot-style position."
+    },
+    {
+      ticker: "PL", name: "Planet Labs", type: "Stock", group: "watch",
+      price: 31.11, sentiment: "Bullish-to-neutral, 'Hold' consensus", risk: "moderate",
+      what: "Earth-observation satellites and space data — one of the more established and accessible space-data names.",
+      why: "More diversified space-economy exposure with real business momentum, but less direct leverage to launch hype."
+    },
+    {
+      ticker: "FLY", name: "Firefly Aerospace", type: "Stock", group: "watch",
+      price: 33.42, sentiment: "Bullish but pressured", risk: "aggressive",
+      what: "Newer space-launch company that shows up in 'next SpaceX' coverage.",
+      why: "Could catch momentum flow, but recent selling pressure and share-overhang/dilution concerns make it a choppier trade."
+    },
+    {
+      ticker: "ASTS", name: "AST SpaceMobile", type: "Stock", group: "watch",
+      price: 87.32, sentiment: "Bullish long-term, near-term volatile", risk: "aggressive",
+      what: "Building a space-based cellular network — satellite communications rather than launch.",
+      why: "High-beta narrative stock that rides the broader space wave, with plenty of headline risk and a price well above the under-$50 filter."
+    },
+    {
+      ticker: "UFO", name: "Procure Space ETF", type: "ETF", group: "watch",
+      price: 54.10, sentiment: "Bullish, established basket", risk: "safer",
+      what: "The original space ETF — aerospace and space-aligned companies including RKLB, PL, IRDM, GSAT, MDA, ASTS. Up ~51% YTD, ~$1.2B AUM.",
+      why: "A broader, more established space basket. Solid alternative to NASA/MARS, though it sits just above the under-$50 filter and has concentration concerns."
+    },
+    {
+      ticker: "ARKX", name: "ARK Space & Defense Innovation ETF", type: "ETF", group: "watch",
+      price: null, sentiment: "Bullish, broad thematic", risk: "safer",
+      what: "ARK's space exploration and defense innovation fund — broader and more diversified than the pure space baskets.",
+      why: "A more diversified thematic vehicle if you want space exposure with a defense/innovation tilt."
+    },
+    {
+      ticker: "ROKT", name: "SPDR Kensho Final Frontiers ETF", type: "ETF", group: "watch",
+      price: null, sentiment: "Bullish, diversified", risk: "safer",
+      what: "Space and deep-sea exploration theme ETF with significant defense overlap.",
+      why: "Another diversified space vehicle mentioned in coverage — less pure-play than NASA, MARS, or UFO."
+    }
+  ];
+
+  const RISK_ORDER = { safer: 0, moderate: 1, aggressive: 2 };
+  const RISK_LABEL = { safer: "Safer", moderate: "Moderate", aggressive: "Aggressive" };
+  const GROUP_LABEL = { core: "Core", new: "New Pick", watch: "Watchlist" };
+
+  const state = { group: "all", risks: new Set(), sort: "default", expanded: null };
+
+  const tbody = document.getElementById("tableBody");
+
+  function fmtPrice(p) {
+    return p === null
+      ? '<span class="price-na">core holding</span>'
+      : "$" + p.toFixed(2);
+  }
+
+  function visiblePlays() {
+    let rows = PLAYS.filter(p =>
+      (state.group === "all" || p.group === state.group) &&
+      (state.risks.size === 0 || state.risks.has(p.risk))
+    );
+    const s = state.sort;
+    if (s === "price-asc") rows = [...rows].sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+    else if (s === "price-desc") rows = [...rows].sort((a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity));
+    else if (s === "risk") rows = [...rows].sort((a, b) => RISK_ORDER[a.risk] - RISK_ORDER[b.risk]);
+    else if (s === "ticker") rows = [...rows].sort((a, b) => a.ticker.localeCompare(b.ticker));
+    return rows;
+  }
+
+  function render() {
+    const rows = visiblePlays();
+    tbody.innerHTML = rows.map(p => {
+      const expanded = state.expanded === p.ticker;
+      const main = `
+        <tr class="row" data-ticker="${p.ticker}">
+          <td>
+            <div class="ticker-cell">
+              <span class="ticker-sym">${p.ticker}</span>
+              <span class="ticker-name">${p.name}</span>
+            </div>
+          </td>
+          <td><span class="badge type">${p.type}</span></td>
+          <td><span class="badge grp-${p.group}">${GROUP_LABEL[p.group]}</span></td>
+          <td class="num">${fmtPrice(p.price)}</td>
+          <td class="sentiment">${p.sentiment}</td>
+          <td><span class="badge risk-${p.risk}">${RISK_LABEL[p.risk]}</span></td>
+        </tr>`;
+      const detail = expanded ? `
+        <tr class="detail">
+          <td colspan="6">
+            <div class="detail-grid">
+              <div><h4>What it does</h4><p>${p.what}</p></div>
+              <div><h4>Why it's in the playbook</h4><p>${p.why}</p></div>
+            </div>
+          </td>
+        </tr>` : "";
+      return main + detail;
+    }).join("");
+  }
+
+  tbody.addEventListener("click", e => {
+    const row = e.target.closest("tr.row");
+    if (!row) return;
+    const t = row.dataset.ticker;
+    state.expanded = state.expanded === t ? null : t;
+    render();
+  });
+
+  document.getElementById("groupFilters").addEventListener("click", e => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    if (chip.dataset.group) {
+      state.group = chip.dataset.group;
+      document.querySelectorAll(".chip[data-group]").forEach(c =>
+        c.classList.toggle("active", c === chip));
+    } else if (chip.dataset.risk) {
+      const r = chip.dataset.risk;
+      if (state.risks.has(r)) { state.risks.delete(r); chip.classList.remove("active"); }
+      else { state.risks.add(r); chip.classList.add("active"); }
+    }
+    state.expanded = null;
+    render();
+  });
+
+  document.getElementById("sortSelect").addEventListener("change", e => {
+    state.sort = e.target.value;
+    render();
+  });
+
+  /* ---------- Allocation calculator ---------- */
+  const CORE_SPLIT = [
+    { ticker: "SCHD", weight: 0.4, color: "#4ade80" },
+    { ticker: "SPLG", weight: 0.4, color: "#60a5fa" },
+    { ticker: "BAI",  weight: 0.2, color: "#a78bfa" }
+  ];
+  const SPACE_SPLIT = [
+    { ticker: "NASA", weight: 0.4, color: "#ffb454" },
+    { ticker: "MARS", weight: 0.4, color: "#fb923c" },
+    { ticker: "RDW",  weight: 0.2, color: "#fb7185" }
+  ];
+
+  const amountInput = document.getElementById("amountInput");
+  const spaceSlider = document.getElementById("spaceSlider");
+  const spaceVal = document.getElementById("spaceVal");
+  const allocBar = document.getElementById("allocBar");
+  const allocList = document.getElementById("allocList");
+
+  function renderCalc() {
+    const total = Math.max(0, parseFloat(amountInput.value) || 0);
+    const spacePct = parseInt(spaceSlider.value, 10) / 100;
+    spaceVal.textContent = spaceSlider.value + "%";
+
+    const coreTotal = total * (1 - spacePct);
+    const spaceTotal = total * spacePct;
+
+    const slices = [
+      ...CORE_SPLIT.map(s => ({ ...s, amount: coreTotal * s.weight, pctOfTotal: (1 - spacePct) * s.weight })),
+      ...SPACE_SPLIT.map(s => ({ ...s, amount: spaceTotal * s.weight, pctOfTotal: spacePct * s.weight }))
+    ].filter(s => s.pctOfTotal > 0);
+
+    allocBar.innerHTML = slices.map(s =>
+      `<div style="width:${(s.pctOfTotal * 100).toFixed(1)}%;background:${s.color}" title="${s.ticker}">` +
+      (s.pctOfTotal >= 0.08 ? s.ticker : "") + `</div>`
+    ).join("");
+
+    allocList.innerHTML = slices.map(s => `
+      <div class="alloc-item">
+        <span class="sym"><span class="dot" style="background:${s.color}"></span>${s.ticker}</span>
+        <div class="amt">$${s.amount.toFixed(2)}</div>
+        <div class="pct">${(s.pctOfTotal * 100).toFixed(0)}% of total</div>
+      </div>`
+    ).join("");
+  }
+
+  amountInput.addEventListener("input", renderCalc);
+  spaceSlider.addEventListener("input", renderCalc);
+
+  render();
+  renderCalc();
+</script>
+</body>
+</html>
