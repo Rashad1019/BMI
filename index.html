@@ -211,11 +211,6 @@
     margin-bottom: 0.35rem;
   }
   .detail-grid p { font-size: 0.85rem; color: var(--text-dim); }
-  @media (max-width: 640px) {
-    .detail-grid { grid-template-columns: 1fr; }
-    .ticker-name { display: none; }
-    td, thead th { padding: 0.7rem 0.6rem; }
-  }
 
   .expand-hint {
     font-family: var(--mono);
@@ -224,6 +219,50 @@
     text-align: center;
     padding: 0.6rem;
     border-top: 1px solid var(--border);
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 640px) {
+    .wrap { padding: 1.25rem 0.9rem 3rem; }
+
+    h1 { font-size: 1.5rem; line-height: 1.15; }
+    .subtitle { font-size: 0.85rem; }
+    .snapshot-note { font-size: 0.68rem; }
+
+    /* strategy cards: single column */
+    .strategy { grid-template-columns: 1fr; }
+
+    /* controls: let chips wrap naturally, sort full-width */
+    .controls { row-gap: 0.45rem; }
+    .controls .divider { display: none; }
+    .controls select { margin-left: 0; width: 100%; padding: 0.5rem 0.7rem; font-size: 0.8rem; }
+
+    /* table: hide less-critical columns */
+    .col-type, .col-sentiment { display: none; }
+    td, thead th { padding: 0.7rem 0.55rem; }
+    .ticker-name { font-size: 0.72rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* expanded detail: single column */
+    .detail-grid { grid-template-columns: 1fr; }
+    tr.detail td { padding: 0.9rem 0.9rem 1rem; }
+
+    /* calculator: stack inputs */
+    .calc { padding: 1.1rem; }
+    .calc-inputs { flex-direction: column; gap: 1rem; }
+    .calc-field input[type="number"] { width: 100%; font-size: 1rem; }
+    .calc-field input[type="range"] { width: 100%; }
+
+    /* alloc grid: 2 columns on phone */
+    .alloc-list { grid-template-columns: repeat(2, 1fr); }
+    .alloc-item .amt { font-size: 1rem; }
+
+    h2 { font-size: 1.2rem; }
+    .section-sub { font-size: 0.83rem; }
+  }
+
+  @media (max-width: 380px) {
+    .alloc-list { grid-template-columns: 1fr; }
+    .chip { font-size: 0.7rem; padding: 0.35rem 0.7rem; }
   }
 
   /* ---------- Calculator ---------- */
@@ -367,16 +406,16 @@
         <thead>
           <tr>
             <th>Ticker / Name</th>
-            <th>Type</th>
+            <th class="col-type">Type</th>
             <th>Group</th>
             <th class="num">Price</th>
-            <th>Sentiment</th>
+            <th class="col-sentiment">Sentiment</th>
             <th>Risk</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
       </table>
-      <div class="expand-hint">click any row to expand the full thesis</div>
+      <div class="expand-hint">tap or click any row to expand the full thesis</div>
     </div>
   </section>
 
@@ -542,10 +581,10 @@
               <span class="ticker-name">${p.name}</span>
             </div>
           </td>
-          <td><span class="badge type">${p.type}</span></td>
+          <td class="col-type"><span class="badge type">${p.type}</span></td>
           <td><span class="badge grp-${p.group}">${GROUP_LABEL[p.group]}</span></td>
           <td class="num">${fmtPrice(p.price)}</td>
-          <td class="sentiment">${p.sentiment}</td>
+          <td class="col-sentiment sentiment">${p.sentiment}</td>
           <td><span class="badge risk-${p.risk}">${RISK_LABEL[p.risk]}</span></td>
         </tr>`;
       const detail = expanded ? `
