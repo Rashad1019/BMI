@@ -225,26 +225,71 @@
   @media (max-width: 640px) {
     .wrap { padding: 1.25rem 0.9rem 3rem; }
 
-    h1 { font-size: 1.5rem; line-height: 1.15; }
+    h1 { font-size: 1.45rem; line-height: 1.15; }
     .subtitle { font-size: 0.85rem; }
     .snapshot-note { font-size: 0.68rem; }
 
     /* strategy cards: single column */
     .strategy { grid-template-columns: 1fr; }
 
-    /* controls: let chips wrap naturally, sort full-width */
+    /* controls: chips wrap naturally, sort goes full-width */
     .controls { row-gap: 0.45rem; }
     .controls .divider { display: none; }
-    .controls select { margin-left: 0; width: 100%; padding: 0.5rem 0.7rem; font-size: 0.8rem; }
+    .controls select { margin-left: 0; width: 100%; padding: 0.55rem 0.7rem; font-size: 0.82rem; }
 
-    /* table: hide less-critical columns */
-    .col-type, .col-sentiment { display: none; }
-    td, thead th { padding: 0.7rem 0.55rem; }
-    .ticker-name { font-size: 0.72rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* ---- Table → Card layout ---- */
+    .table-wrap { border-radius: 0; border-left: none; border-right: none; }
 
-    /* expanded detail: single column */
+    /* hide the header row entirely */
+    thead { display: none; }
+
+    /* each data row becomes a 2-column card */
+    tbody tr.row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 0.3rem 0.75rem;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--border);
+      border-radius: 0;
+    }
+    tbody tr.row:last-child { border-bottom: none; }
+
+    /* col 1 row 1: ticker + name */
+    tbody tr.row td:nth-child(1) {
+      grid-column: 1; grid-row: 1;
+      padding: 0;
+    }
+    /* col 1 row 2: group badge */
+    tbody tr.row td:nth-child(3) {
+      grid-column: 1; grid-row: 2;
+      padding: 0;
+    }
+    /* hide type and sentiment columns */
+    tbody tr.row td.col-type,
+    tbody tr.row td.col-sentiment { display: none; }
+    /* price: top right */
+    tbody tr.row td.num {
+      grid-column: 2; grid-row: 1;
+      padding: 0; text-align: right;
+      font-size: 0.95rem;
+    }
+    /* risk badge: bottom right */
+    tbody tr.row td:last-child {
+      grid-column: 2; grid-row: 2;
+      padding: 0; text-align: right;
+    }
+
+    /* show company name on mobile since table headers are gone */
+    .ticker-name { display: block; font-size: 0.75rem; }
+
+    /* expanded detail: full width, single column */
+    tbody tr.detail { display: block; }
+    tbody tr.detail td {
+      display: block;
+      padding: 0.9rem 1rem 1rem;
+    }
     .detail-grid { grid-template-columns: 1fr; }
-    tr.detail td { padding: 0.9rem 0.9rem 1rem; }
 
     /* calculator: stack inputs */
     .calc { padding: 1.1rem; }
@@ -263,6 +308,7 @@
   @media (max-width: 380px) {
     .alloc-list { grid-template-columns: 1fr; }
     .chip { font-size: 0.7rem; padding: 0.35rem 0.7rem; }
+    h1 { font-size: 1.25rem; }
   }
 
   /* ---------- Calculator ---------- */
